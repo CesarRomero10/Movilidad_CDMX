@@ -116,7 +116,7 @@ iu <- fluidPage(
     )
   ),
   
-  tags$footer(
+tags$footer(
     tags$div(
       style = "text-align: center; padding: 20px; font-size: 14px; color: #004F87; background-color: #e9ecef; border-radius: 10px; border: 1px solid #ced4da;",
       "Aplicación desarrollada con Shiny de Rstudio por José César Romero Galván.",
@@ -125,9 +125,9 @@ iu <- fluidPage(
       tags$a(href = "https://semovi.cdmx.gob.mx/storage/app/media/HT/2024/ReporteHT_2doTrimestre2024_.pdf", 
              target = "_blank", "Reporte Trimestral de Hechos de Tránsito Abril - Junio 2024"),
       tags$br(),
-      "Código de fuente de esta app y del procesamiento de los datos disponible en GitHub:",
+      "Código de fuente de esta app y del procesamiento de los datos disponible en",
       tags$br(),
-      tags$a(href = "https://github.com/josecesarr/app-trafico", target = "_blank", "Ver en GitHub")
+      tags$a(href = "https://github.com/CesarRomero10/Movilidad_CDMX", target = "_blank", "GitHub")
     )
   ),
   

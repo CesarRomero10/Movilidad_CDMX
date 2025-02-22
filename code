@@ -7,7 +7,7 @@ library(tidyr)
 
 # Cargar datos desde los archivos Excel
 datos_lesionados <- read_excel("personas_lesionadas.xlsx") %>%
-  rename(`Trimestre Año` = Trimestre_Año) %>%  # Renombrar la columna
+  rename(`Trimestre Año` = Trimestre_Año) %>%  
   mutate(`Trimestre Año` = gsub("_", " ", `Trimestre Año`),
          `Trimestre Año` = factor(`Trimestre Año`, 
                                   levels = c("IT 2019", "IIT 2019", "IIIT 2019", "IVT 2019", 
@@ -18,7 +18,7 @@ datos_lesionados <- read_excel("personas_lesionadas.xlsx") %>%
                                              "IT 2024", "IIT 2024", "IIIT 2024", "IVT 2024")))
 
 datos_fallecidos <- read_excel("personas_fallecidas.xlsx") %>%
-  rename(`Trimestre Año` = Trimestre_Año) %>%  # Renombrar la columna
+  rename(`Trimestre Año` = Trimestre_Año) %>%  
   mutate(`Trimestre Año` = gsub("_", " ", `Trimestre Año`),
          `Trimestre Año` = factor(`Trimestre Año`, 
                                   levels = c("IT 2019", "IIT 2019", "IIIT 2019", "IVT 2019", 
@@ -30,100 +30,146 @@ datos_fallecidos <- read_excel("personas_fallecidas.xlsx") %>%
 
 Matriz_Personas_Fallecidas2024 <- read_excel("matriz_personas_fallecidas.xlsx") 
 
-# Colores de la paleta
-colores_paleta <- c("azul" = "#004F87", "dorada" = "#FFD100", "verde" = "#28a745", "rojo" = "#dc3545")
+Reportes_viales2024 <- read_excel("Reportes_Incidentes_Viales.xlsx") %>%
+  mutate(`Trimestre Año` = factor(`Trimestre Año`, 
+                                  levels = c("IT 2019", "IIT 2019", "IIIT 2019", "IVT 2019", 
+                                             "IT 2020", "IIT 2020", "IIIT 2020", "IVT 2020", 
+                                             "IT 2021", "IIT 2021", "IIIT 2021", "IVT 2021", 
+                                             "IT 2022", "IIT 2022", "IIIT 2022", "IVT 2022", 
+                                             "IT 2023", "IIT 2023", "IIIT 2023", "IVT 2023", 
+                                             "IT 2024", "IIT 2024", "IIIT 2024", "IVT 2024")))
+
+# Nueva paleta de colores basada en la imagen proporcionada
+colores_paleta <- c("indigo_dye" = "#1F456E", "ming" = "#427D9D", "sage" = "#9BBEC8", 
+                    "pale_aqua" = "#DDF2FD", "almost_black" = "#16423C", "conductor" = "#fedc97")
+
+# Nueva paleta para líneas en Totales (colores vibrantes y distinguibles)
+colores_totales <- c("Motociclista" = "#FF4500",  # Naranja brillante
+                     "Peatón" = "#32CD32",       # Verde lima
+                     "Ciclista" = "#1E90FF",     # Azul dodger
+                     "Conductor" = "#FFD700",    # Dorado
+                     "Pasajero" = "#8A2BE2")     # Violeta vibrante
 
 # UI
 iu <- fluidPage(
+  tags$style(HTML("
+    .btn { text-align: left; }  /* Alinea el texto de los botones a la izquierda */
+  ")),
+  
   tags$div(
     style = "background-color: #e9ecef; border-radius: 10px; padding: 20px; text-align: center; 
-             font-size: 24px; font-weight: bold; color: #004F87; border: 1px solid #ced4da;",
+             font-size: 24px; font-weight: bold; color: #1F456E; border: 1px solid #ced4da;",
     tags$span("Visualizador Interactivo del Reporte Trimestral De Hechos De Tránsito Abril - Junio 2024")
   ),
   
+  # Recuadro 1: Información del autor (con fondo blanco)
   tags$div(
-    style = "text-align: justify; font-size: 16px; padding: 10px; color: #004F87;",
+    style = "background-color: #ffffff; border-radius: 10px; padding: 15px; margin: 20px; border: 1px solid #ced4da; text-align: justify; font-size: 16px; color: #1F456E;",
     tags$p("Mtro. José César Romero Galván"),
-    tags$p("Estudiante de Doctorado en Ciencias Políticas y Sociales en la Universidad Nacional Autónoma de México (UNAM), con una Mención Honorífica en mis estudios de maestría. Fui reconocido con el segundo lugar en el 1er Premio Nacional de Políticas Públicas, organizado por El Colegio de México (COLMEX) y la Universidad de Monterrey (UDEM), y como uno de los seis mejores Enlaces Universitarios del Banco de México en 2018. Además, representé al alumnado de Maestría en el Comité Académico del Programa de Posgrado en la UNAM. He trabajado en proyectos de investigación y voluntariados en instituciones como la UNAM, la CEPAL y la UNESCO, donde he realizado análisis datos utilizando RStudio."),
+    tags$p("Estudiante de Doctorado en Ciencias Políticas y Sociales en el campo disciplinario de la Administración Pública en la Universidad Nacional Autónoma de México (UNAM), obtuve Mención Honorífica en mis estudios de maestría en Gobierno y Asuntos Públicos (Políticas Públicas) en la misma institución. Fui reconocido con el segundo lugar en el 1er Premio Nacional de Políticas Públicas, organizado por El Colegio de México (COLMEX) y la Universidad de Monterrey (UDEM) y como uno de los seis Enlaces Universitarios del Banco de México con mejor desempeño en el año 2018. Además, representé al alumnado de Maestría en el Comité Académico del Programa de Posgrado en la UNAM en el periodo 2023 - 2025. He tomado distintos cursos sobre econometría, estadistica inferencial y de Ciencia de Datos para las Ciencias Sociales en instituciones como la UNAM, CIDE y FLACSO México. He trabajado en proyectos de investigación y voluntariados en instituciones como CEPAL, UNESCO y UNAM, donde he realizado análisis y visualización de datos utilizando RStudio.")
+  ),
+  
+  # Texto original del segundo recuadro (sin fondo blanco)
+  tags$div(
+    style = "text-align: justify; font-size: 16px; padding: 10px; color: #1F456E;",
     tags$p("Este visualizador contiene gráficos interactivos que representan estadísticas oficiales de personas lesionadas y fallecidas en hechos de tránsito, obtenidas de la Secretaria de Movilidad del Gobierno de la Ciudad de México en colaboración con la Secretaria de Seguridad Ciudadana, la Fiscalia General de Justicia de la Ciudad de México, C5, Bloomberg Philantropies y la Iniciative for Global Road Safety. El objetivo de esta aplicación es proporcionar una herramienta de visualización de los datos relacionados con los hechos de tránsito, permitiendo analizar las tendencias a lo largo de los años, con el fin de darle una herramienta a los tomadores de decisiones para mejorar las políticas públicas de movilidad en la capital del país."),
-    tags$p(style = "color: #5b9bd5;", "Datos más recientes disponibles: Abril - Junio de 2024.")
+    tags$p(style = "color: #427D9D;", "Datos más recientes disponibles: Abril - Junio de 2024.")
+  ),
+  
+  tags$div(
+    style = "background-color: #f8f9fa; border-radius: 10px; padding: 15px; margin: 20px; border: 1px solid #ced4da;",
+    tags$h3("Reportes de incidentes viales ingresados al C5", style = "color: #1F456E; font-weight: normal;"),
+    tags$p("Esta gráfica muestra la evolución de los reportes de incidentes viales recibidos por el Centro de Comando, Control, Cómputo, Comunicaciones y Contacto Ciudadano (C5) desde el primer trimestre de 2019 hasta el segundo trimestre de 2024. Permite analizar tendencias temporales en la incidencia de estos eventos.", 
+           style = "color: #1F456E; font-size: 14px;"),
+    div(style = "background-color: #1F456E; color: white; padding: 5px; border-radius: 5px;",
+        radioButtons("tipo_grafico_reportes", "Seleccionar tipo de gráfico:",
+                     choices = list("Barras" = "barra", "Líneas" = "linea"),
+                     selected = "barra", inline = TRUE)),
+    plotlyOutput("grafico_reportes_viales"),
+    downloadButton("descargar_reportes_viales", "Descargar Datos de Reportes Viales", 
+                   style = "background-color: #fedc97; color: black; border: none;")
   ),
   
   sidebarLayout(
     sidebarPanel(
+      style = "background-color: #1F456E; color: white; text-align: left; width: 100%;",
       selectInput("usuario", "Selecciona el tipo de usuario:",
-                  choices = colnames(datos_lesionados)[-1], selected = "Motociclista"),
+                  choices = c("Totales", colnames(datos_lesionados)[-1]), selected = "Totales"),
       radioButtons("tipo_dato", "Seleccionar tipo de datos:",
                    choices = list("Lesionados" = "lesionados", "Fallecidos" = "fallecidos"),
                    selected = "lesionados"),
       radioButtons("grafico_tipo", "Seleccionar tipo de gráfico:",
                    choices = list("Líneas" = "linea", "Barras" = "barra"),
                    selected = "linea"),
-      downloadButton("descargar_filtrado", "Descargar Datos Filtrados"),
-      downloadButton("descargar_completo", "Descargar Base de Datos Completa"),
-      style = "background-color: #004F87; color: white;"
+      downloadButton("descargar_filtrado", "Descargar Datos Filtrados", 
+                     style = "background-color: #fedc97; color: black; border: none;"),  # Amarillo
+      downloadButton("descargar_completo", "Descargar Base de Datos Completa", 
+                     style = "background-color: #fedc97; color: black; border: none;")  # Amarillo
     ),
     
     mainPanel(
       fluidRow(
-        # Gráfica de tendencia
         column(
           width = 12,
           tags$div(
             style = "background-color: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px solid #ced4da;",
-            plotlyOutput("grafico")
+            uiOutput("titulo_grafico_tendencia"),
+            tags$p("Esta gráfica permite visualizar la tendencia de personas lesionadas o fallecidas en hechos de tránsito por tipo de usuario (motociclistas, peatones, etc.) o en total, desde el primer trimestre de 2019 hasta el segundo trimestre de 2024. Facilita la identificación de patrones a lo largo del tiempo.", 
+                   style = "color: #1F456E; font-size: 14px;"),
+            plotlyOutput("grafico", height = "600px")  # Aumentar altura de la gráfica
           )
         )
       ),
       fluidRow(
-        # Gráfica de pastel (porcentajes)
         column(
           width = 6,
           tags$div(
             style = "background-color: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px solid #ced4da;",
+            tags$h3("Distribución porcentual", style = "color: #1F456E; font-weight: normal;"),
+            tags$p("Este gráfico de pastel muestra la distribución porcentual de personas lesionadas o fallecidas según el tipo de usuario, acumulado desde 2019 hasta 2024. Ayuda a comprender la proporción de cada categoría en el total.", 
+                   style = "color: #1F456E; font-size: 14px;"),
             plotlyOutput("grafico_pastel_porcentaje"),
-            downloadButton("descargar_pastel_porcentaje", "Descargar Datos de Pastel (Porcentajes)")
+            downloadButton("descargar_pastel_porcentaje", "Descargar Datos de Pastel (Porcentajes)", 
+                           style = "background-color: #fedc97; color: black; border: none;")
           )
         ),
-        # Gráfica de pastel (totales)
         column(
           width = 6,
           tags$div(
             style = "background-color: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px solid #ced4da;",
+            tags$h3("Distribución total", style = "color: #1F456E; font-weight: normal;"),
+            tags$p("Este gráfico de pastel presenta el número total de personas lesionadas o fallecidas por tipo de usuario, acumulado desde 2019 hasta 2024. Ofrece una visión clara de la magnitud absoluta de cada categoría.", 
+                   style = "color: #1F456E; font-size: 14px;"),
             plotlyOutput("grafico_pastel_total"),
-            downloadButton("descargar_pastel_total", "Descargar Datos de Pastel (Totales)")
+            downloadButton("descargar_pastel_total", "Descargar Datos de Pastel (Totales)", 
+                           style = "background-color: #fedc97; color: black; border: none;")
           )
         )
       )
     )
   ),
   
-  # Nueva sección para la tabla
-  fluidRow(
-    column(
-      width = 12,
-      tags$div(
-        style = "background-color: #f8f9fa; border-radius: 10px; padding: 15px; margin: 20px; border: 1px solid #ced4da;",
-        tags$h3("Tabla de Personas Fallecidas IIT 2024", style = "color: #004F87; text-align: center; font-weight: normal;"),  # Sin negrita
-        tags$style(HTML("
-          table thead th {
-            color: #004F87;  /* Color azul para la primera fila */
-          }
-        ")),
-        tableOutput("tabla_matriz"),  # Tabla básica sin DT
-        downloadButton("descargar_tabla", "Descargar Datos de la Tabla")
-      )
-    )
+  tags$div(
+    style = "background-color: #f8f9fa; border-radius: 10px; padding: 15px; margin: 20px; border: 1px solid #ced4da;",
+    tags$h3("Tabla de personas fallecidas IIT 2024", style = "color: #1F456E; text-align: center; font-weight: normal;"),
+    tags$style(HTML("
+      table thead th {
+        color: #1F456E;  /* Color azul para la primera fila */
+      }
+    ")),
+    tableOutput("tabla_matriz"),
+    downloadButton("descargar_tabla", "Descargar Datos de la Tabla", 
+                   style = "background-color: #fedc97; color: black; border: none;")
   ),
   
-tags$footer(
+  tags$footer(
     tags$div(
-      style = "text-align: center; padding: 20px; font-size: 14px; color: #004F87; background-color: #e9ecef; border-radius: 10px; border: 1px solid #ced4da;",
+      style = "text-align: center; padding: 20px; font-size: 14px; color: #1F456E; background-color: #e9ecef; border-radius: 10px; border: 1px solid #ced4da;",
       "Aplicación desarrollada con Shiny de Rstudio por José César Romero Galván.",
       tags$br(),
       "Fuente de los datos: ",
       tags$a(href = "https://semovi.cdmx.gob.mx/storage/app/media/HT/2024/ReporteHT_2doTrimestre2024_.pdf", 
-             target = "_blank", "Reporte Trimestral de Hechos de Tránsito Abril - Junio 2024"),
+             target = "_blank", "Reporte Trimestral de Hechos de Tránsito Abril - Junio de 2024"),
       tags$br(),
       "Código de fuente de esta app y del procesamiento de los datos disponible en",
       tags$br(),
@@ -139,12 +185,76 @@ tags$footer(
 # Servidor
 servidor <- function(input, output) {
   
+  # Título dinámico para la gráfica de tendencia
+  output$titulo_grafico_tendencia <- renderUI({
+    if (input$usuario == "Totales") {
+      tags$h3("Tendencia de personas lesionadas o fallecidas en hechos de tránsito", style = "color: #1F456E; font-weight: normal;")
+    } else {
+      tipo_dato_texto <- ifelse(input$tipo_dato == "lesionados", "lesionados", "fallecidos")
+      usuario_texto <- tolower(tipo_usuario_plural(input$usuario))
+      tags$h3(paste("Gráfica de tendencia de", usuario_texto, tipo_dato_texto, "en hechos de tránsito"), style = "color: #1F456E; font-weight: normal;")
+    }
+  })
+  
+  # Gráfica de barras o líneas para reportes viales
+  output$grafico_reportes_viales <- renderPlotly({
+    if (input$tipo_grafico_reportes == "barra") {
+      p <- ggplot(Reportes_viales2024, aes(x = `Trimestre Año`, y = `Reportes por incidentes viales ingresados al C5`)) +
+        geom_bar(stat = "identity", fill = colores_paleta["sage"]) +
+        theme_minimal() +
+        labs(title = NULL,
+             x = "Trimestre", 
+             y = "Número de Reportes") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1),
+              plot.title = element_text(color = colores_paleta["indigo_dye"], size = 16),
+              axis.title = element_text(color = colores_paleta["indigo_dye"]),
+              axis.text = element_text(color = colores_paleta["indigo_dye"])) +
+        theme(plot.background = element_rect(fill = "#e9ecef"))
+      
+      ggplotly(p) %>%
+        layout(hoverlabel = list(font = list(color = "white")))
+    } else {
+      p <- ggplot(Reportes_viales2024, aes(x = `Trimestre Año`, y = `Reportes por incidentes viales ingresados al C5`, group = 1)) +
+        geom_line(color = colores_paleta["ming"], size = 0.3) +  # Líneas más delgadas
+        geom_point(color = "#00CED1", size = 3, shape = 16) +  # Puntos más grandes, turquesa, círculo
+        theme_minimal() +
+        labs(title = NULL,
+             x = "Trimestre", 
+             y = "Número de Reportes") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1),
+              plot.title = element_text(color = colores_paleta["indigo_dye"], size = 16),
+              axis.title = element_text(color = colores_paleta["indigo_dye"]),
+              axis.text = element_text(color = colores_paleta["indigo_dye"])) +
+        theme(plot.background = element_rect(fill = "#e9ecef"))
+      
+      ggplotly(p)
+    }
+  })
+  
+  # Descargar datos de Reportes_viales2024
+  output$descargar_reportes_viales <- downloadHandler(
+    filename = function() {
+      "reportes_viales_2024.csv"
+    },
+    content = function(file) {
+      write.csv(Reportes_viales2024, file, row.names = FALSE)
+    }
+  )
+  
   # Función reactiva para obtener los datos filtrados
   datos_filtrados <- reactive({
     if (input$tipo_dato == "lesionados") {
-      datos_lesionados %>% select(`Trimestre Año`, input$usuario)
+      if (input$usuario == "Totales") {
+        datos_lesionados
+      } else {
+        datos_lesionados %>% select(`Trimestre Año`, input$usuario)
+      }
     } else {
-      datos_fallecidos %>% select(`Trimestre Año`, input$usuario)
+      if (input$usuario == "Totales") {
+        datos_fallecidos
+      } else {
+        datos_fallecidos %>% select(`Trimestre Año`, input$usuario)
+      }
     }
   })
   
@@ -192,31 +302,88 @@ servidor <- function(input, output) {
     tipo_dato_texto <- ifelse(input$tipo_dato == "lesionados", "lesionados", "fallecidos")
     
     if (input$grafico_tipo == "linea") {
-      p <- ggplot(datos_seleccionados(), aes(x = `Trimestre Año`, y = .data[[input$usuario]])) + 
-        geom_line(group = 1, color = colores_paleta["azul"], size = 0.5) +
-        geom_point(color = colores_paleta["dorada"], size = 2.5) +
-        theme_minimal() +
-        labs(title = paste("Tendencia de", tipo_usuario, tipo_dato_texto),
-             x = "Trimestre", y = paste("Número de personas", tipo_dato_texto)) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1),
-              plot.title = element_text(color = colores_paleta["azul"], size = 16, face = ""),
-              axis.title = element_text(color = colores_paleta["azul"]),
-              axis.text = element_text(color = colores_paleta["azul"])) +
-        theme(plot.background = element_rect(fill = "#f1f1f1"))
+      if (input$usuario == "Totales") {
+        datos_long <- datos_seleccionados() %>%
+          pivot_longer(cols = -`Trimestre Año`, 
+                       names_to = "tipo_usuario", 
+                       values_to = "valor")
+        
+        p <- ggplot(datos_long, aes(x = `Trimestre Año`, y = valor, color = tipo_usuario, group = tipo_usuario, 
+                                    text = paste("Trimestre:", `Trimestre Año`, "<br>",
+                                                 "Valor:", valor, "<br>",
+                                                 "Usuario:", tipo_usuario))) +  # Personalizar tooltip
+          geom_line(size = 0.3) +  # Líneas más delgadas
+          geom_point(size = 2.5, color = "#00CED1", shape = 16) +  # Puntos más grandes, turquesa, círculo
+          scale_color_manual(values = colores_totales, name = "Tipo de usuario") +
+          theme_minimal() +
+          labs(title = NULL,
+               x = "Trimestre", 
+               y = paste("Número de personas", tipo_dato_texto)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                plot.title = element_text(color = colores_paleta["indigo_dye"], size = 16),
+                axis.title = element_text(color = colores_paleta["indigo_dye"]),
+                axis.text = element_text(color = colores_paleta["indigo_dye"]),
+                legend.position = "bottom",
+                legend.title = element_text(size = 10),  # Tamaño de letra más pequeño
+                plot.margin = unit(c(1, 1, 3, 1), "cm")) +  # Margen inferior interno
+          theme(plot.background = element_rect(fill = "#e9ecef"))
+        
+        ggplotly(p, tooltip = "text") %>%  # Usar el texto personalizado para el tooltip
+          layout(legend = list(orientation = "h", x = 0.1, y = -0.25))  # Leyenda debajo de "Trimestre"
+      } else {
+        p <- ggplot(datos_seleccionados(), aes(x = `Trimestre Año`, y = .data[[input$usuario]], group = 1)) + 
+          geom_line(color = colores_paleta["ming"], size = 0.3) +  # Líneas más delgadas
+          geom_point(color = "#00CED1", size = 2.5, shape = 16) +  # Puntos más grandes, turquesa, círculo
+          theme_minimal() +
+          labs(title = NULL,
+               x = "Trimestre", 
+               y = paste("Número de personas", tipo_dato_texto)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                plot.title = element_text(color = colores_paleta["indigo_dye"], size = 16),
+                axis.title = element_text(color = colores_paleta["indigo_dye"]),
+                axis.text = element_text(color = colores_paleta["indigo_dye"])) +
+          theme(plot.background = element_rect(fill = "#e9ecef"))
+        
+        ggplotly(p)
+      }
     } else {
-      p <- ggplot(datos_seleccionados(), aes(x = `Trimestre Año`, y = .data[[input$usuario]])) + 
-        geom_bar(stat = "identity", fill = colores_paleta["dorada"]) +
-        theme_minimal() +
-        labs(title = paste("Distribución de", tipo_usuario, tipo_dato_texto),
-             x = "Trimestre", y = paste("Número de personas", tipo_dato_texto)) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1),
-              plot.title = element_text(color = colores_paleta["azul"], size = 16, face = ""),
-              axis.title = element_text(color = colores_paleta["azul"]),
-              axis.text = element_text(color = colores_paleta["azul"])) +
-        theme(plot.background = element_rect(fill = "#f1f1f1"))
+      if (input$usuario == "Totales") {
+        datos_sum <- datos_seleccionados() %>%
+          rowwise() %>%
+          mutate(Total = sum(c_across(-`Trimestre Año`), na.rm = TRUE)) %>%
+          select(`Trimestre Año`, Total)
+        
+        p <- ggplot(datos_sum, aes(x = `Trimestre Año`, y = Total)) + 
+          geom_bar(stat = "identity", fill = colores_paleta["sage"]) +
+          theme_minimal() +
+          labs(title = NULL,
+               x = "Trimestre", 
+               y = paste("Número de personas", tipo_dato_texto)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                plot.title = element_text(color = colores_paleta["indigo_dye"], size = 16),
+                axis.title = element_text(color = colores_paleta["indigo_dye"]),
+                axis.text = element_text(color = colores_paleta["indigo_dye"])) +
+          theme(plot.background = element_rect(fill = "#e9ecef"))
+        
+        ggplotly(p) %>%
+          layout(hoverlabel = list(font = list(color = "white")))
+      } else {
+        p <- ggplot(datos_seleccionados(), aes(x = `Trimestre Año`, y = .data[[input$usuario]])) + 
+          geom_bar(stat = "identity", fill = colores_paleta["sage"]) +
+          theme_minimal() +
+          labs(title = NULL,
+               x = "Trimestre", 
+               y = paste("Número de personas", tipo_dato_texto)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                plot.title = element_text(color = colores_paleta["indigo_dye"], size = 16),
+                axis.title = element_text(color = colores_paleta["indigo_dye"]),
+                axis.text = element_text(color = colores_paleta["indigo_dye"])) +
+          theme(plot.background = element_rect(fill = "#e9ecef"))
+        
+        ggplotly(p) %>%
+          layout(hoverlabel = list(font = list(color = "white")))
+      }
     }
-    
-    ggplotly(p)
   })
   
   # Datos para las gráficas de pastel
@@ -230,24 +397,32 @@ servidor <- function(input, output) {
   # Gráfica de pastel (porcentajes)
   output$grafico_pastel_porcentaje <- renderPlotly({
     datos <- datos_pastel()
+    colores_ajustados <- ifelse(datos$tipo_usuario == "Conductor", "#fedc97", colores_paleta[match(datos$tipo_usuario, names(colores_paleta))])
+    colores_ajustados[is.na(colores_ajustados)] <- colores_paleta[!names(colores_paleta) %in% c("conductor")][1:sum(is.na(colores_ajustados))]
+    
     p_pastel <- plot_ly(datos, labels = ~tipo_usuario, values = ~porcentaje, type = 'pie',
                         textinfo = 'label+percent', hoverinfo = 'label+percent',
-                        marker = list(colors = colores_paleta)) %>%
-      layout(title = "Distribución de personas (Porcentajes)",
-             titlefont = list(color = colores_paleta["azul"], size = 18, family = "Arial, sans-serif"),
-             showlegend = FALSE)
+                        marker = list(colors = colores_ajustados)) %>%
+      layout(title = NULL,
+             titlefont = list(color = colores_paleta["indigo_dye"], size = 18, family = "Arial, sans-serif"),
+             showlegend = FALSE,
+             paper_bgcolor = "#e9ecef")
     p_pastel
   })
   
   # Gráfica de pastel (totales)
   output$grafico_pastel_total <- renderPlotly({
     datos <- datos_pastel()
+    colores_ajustados <- ifelse(datos$tipo_usuario == "Conductor", "#fedc97", colores_paleta[match(datos$tipo_usuario, names(colores_paleta))])
+    colores_ajustados[is.na(colores_ajustados)] <- colores_paleta[!names(colores_paleta) %in% c("conductor")][1:sum(is.na(colores_ajustados))]
+    
     p_pastel <- plot_ly(datos, labels = ~tipo_usuario, values = ~total, type = 'pie',
                         textinfo = 'label+value', hoverinfo = 'label+value',
-                        marker = list(colors = colores_paleta)) %>%
-      layout(title = "Distribución de personas (Totales)",
-             titlefont = list(color = colores_paleta["azul"], size = 18, family = "Arial, sans-serif"),
-             showlegend = FALSE)
+                        marker = list(colors = colores_ajustados)) %>%
+      layout(title = NULL,
+             titlefont = list(color = colores_paleta["indigo_dye"], size = 18, family = "Arial, sans-serif"),
+             showlegend = FALSE,
+             paper_bgcolor = "#e9ecef")
     p_pastel
   })
   
@@ -271,13 +446,13 @@ servidor <- function(input, output) {
     }
   )
   
-  # Tabla de la base de datos matriz (sin decimales)
+  # Tabla de Personas Fallecidas
   output$tabla_matriz <- renderTable({
     Matriz_Personas_Fallecidas2024 %>%
       mutate(across(where(is.numeric), ~ format(., nsmall = 0)))
   }, align = "c", striped = TRUE, hover = TRUE, bordered = TRUE)
   
-  # Función para descargar los datos de la tabla
+  # Descargar datos de la tabla de Personas Fallecidas
   output$descargar_tabla <- downloadHandler(
     filename = function() {
       "datos_tabla.csv"
